@@ -8,7 +8,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
  * @see ItemRequestDto
  */
 public class ItemRequestMapper {
-    public static ItemRequestDto toItemRequestDTO(ItemRequest itemRequest) {
+    public static ItemRequestDto toDto(ItemRequest itemRequest) {
         return ItemRequestDto.builder()
                 .description(itemRequest.getDescription())
                 .created(itemRequest.getCreated())

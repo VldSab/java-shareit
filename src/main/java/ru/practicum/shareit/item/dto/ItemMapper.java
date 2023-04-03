@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.model.Item;
  * @see ItemDto
  */
 public class ItemMapper {
-    public static ItemDto mapToDTO(Item item) {
+    public static ItemDto toDto(Item item) {
         return ItemDto.builder()
                 .name(item.getName())
                 .description(item.getDescription())

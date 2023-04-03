@@ -1,6 +1,8 @@
 package ru.practicum.shareit.request.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ru.practicum.shareit.user.model.User;
 
@@ -11,6 +13,8 @@ import java.time.LocalDate;
  */
 @Data
 @SuperBuilder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class ItemRequest {
     private Long id;
     private String description;
