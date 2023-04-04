@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ru.practicum.shareit.user.model.User;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /**
  * Item model
  */
@@ -15,10 +18,13 @@ import ru.practicum.shareit.user.model.User;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Item {
-    Long id;
-    String name;
-    String description;
+    private Long id;
+    @NotBlank
+    private String name;
+    @NotBlank
+    private String description;
+    @NotNull
     @JsonProperty("available")
-    boolean isAvailable;
-    User owner;
+    private Boolean isAvailable;
+    private User owner;
 }

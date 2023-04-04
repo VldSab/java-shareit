@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 public class ItemDto {
+    Long id;
     String name;
     String description;
     @JsonProperty("available")
