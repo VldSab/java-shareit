@@ -8,7 +8,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDate;
 
 /**
- * TODO Sprint add-bookings.
+ * Booking entity.
  */
 @Data
 public class Booking {
