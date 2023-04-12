@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
+/**
+ * Handling request exceptions.
+ */
 @RestControllerAdvice
 public class MainExceptionHandler {
     @ExceptionHandler

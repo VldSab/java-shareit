@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of UserService.
+ * @see UserService
+ */
 @Service
 @RequiredArgsConstructor
 public class UserServiceStandard implements UserService {

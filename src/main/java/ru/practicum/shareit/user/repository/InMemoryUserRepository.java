@@ -5,6 +5,10 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
+/**
+ * In-memory implementation of UserRepository
+ * @see UserRepository
+ */
 @Repository
 public class InMemoryUserRepository implements UserRepository {
 

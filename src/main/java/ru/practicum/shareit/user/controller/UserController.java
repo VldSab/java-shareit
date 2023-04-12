@@ -10,7 +10,8 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * TODO Sprint add-controllers.
+ * Endpoints processing for User.
+ * @see User
  */
 @RestController
 @RequiredArgsConstructor

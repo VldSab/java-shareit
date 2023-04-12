@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
- * Item model
+ * Item model.
  */
 @Data
 @SuperBuilder

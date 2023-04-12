@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO Sprint add-controllers.
+ * Processing endpoints. Working with Items.
+ * @see Item
  */
 @RestController
 @RequiredArgsConstructor
