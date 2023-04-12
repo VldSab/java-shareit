@@ -4,6 +4,7 @@ import ru.practicum.shareit.user.model.User;
 
 /**
  * Mapping User to UserDto
+ *
  * @see User
  * @see UserDto
  */

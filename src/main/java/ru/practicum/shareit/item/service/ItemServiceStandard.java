@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * Items service implementation.
+ *
  * @see ItemService
  */
 @Service

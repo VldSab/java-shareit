@@ -6,6 +6,7 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * DTO of Item
+ *
  * @see ru.practicum.shareit.item.model.Item
  */
 @Data

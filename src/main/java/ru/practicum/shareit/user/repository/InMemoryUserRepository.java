@@ -7,6 +7,7 @@ import java.util.*;
 
 /**
  * In-memory implementation of UserRepository
+ *
  * @see UserRepository
  */
 @Repository

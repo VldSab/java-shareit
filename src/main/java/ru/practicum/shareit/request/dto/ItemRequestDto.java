@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 /**
  * DTO of ItemRequest
+ *
  * @see ru.practicum.shareit.request.model.ItemRequest
  */
 @Data

@@ -4,6 +4,7 @@ import ru.practicum.shareit.item.model.Item;
 
 /**
  * Mapping Item to ItemDto
+ *
  * @see Item
  * @see ItemDto
  */

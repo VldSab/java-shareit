@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of UserService.
+ *
  * @see UserService
  */
 @Service
@@ -25,6 +26,7 @@ public class UserServiceStandard implements UserService {
 
     @Qualifier("inMemoryUserRepository")
     private final UserRepository userRepository;
+
     @Override
     public List<UserDto> list() {
         return userRepository.list().stream()

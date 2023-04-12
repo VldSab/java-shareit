@@ -4,6 +4,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 
 /**
  * Mapping ItemRequest to ItemRequestDto
+ *
  * @see ItemRequest
  * @see ItemRequestDto
  */

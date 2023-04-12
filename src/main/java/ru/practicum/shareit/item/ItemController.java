@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * Processing endpoints. Working with Items.
+ *
  * @see Item
  */
 @RestController
@@ -36,7 +37,7 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public ItemDto getItemById(@RequestHeader(Headers.USER_ID) Long userId, @PathVariable Long id) {
-        return  itemService.getItemById(id, userId);
+        return itemService.getItemById(id, userId);
     }
 
     @GetMapping
@@ -52,7 +53,6 @@ public class ItemController {
         return itemService.getItemByContent(content, userId);
 
     }
-
 
 
 }

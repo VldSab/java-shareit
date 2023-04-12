@@ -5,6 +5,7 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * DTO of User
+ *
  * @see ru.practicum.shareit.user.model.User
  */
 @Data
