@@ -41,12 +41,23 @@ public class ItemServiceStandard implements ItemService {
         Optional<User> user = userRepository.getUserById(userId);
         if (user.isEmpty())
             throw new NotFoundException("Пользователя с id " + userId + " не существует");
-        if (itemRepository.getItemById(id).isEmpty())
+        Optional<Item> cur = itemRepository.getItemById(id);
+        if (cur.isEmpty())
             throw new NotFoundException("Предмета с id " + id + " не существует");
-        if (!Objects.equals(itemRepository.getItemById(id).get().getOwner().getId(), userId))
+        if (!Objects.equals(cur.get().getOwner().getId(), userId))
             throw new NotFoundException("У предмета с id " + id + " другой владелец");
-        item.setOwner(user.get());
-        return ItemMapper.toDto(itemRepository.updateItem(id, item));
+
+        if (item.getOwner() != null)
+            cur.get().setOwner(item.getOwner());
+        if (item.getIsAvailable() != null)
+            cur.get().setIsAvailable(item.getIsAvailable());
+        if (item.getName() != null)
+            cur.get().setName(item.getName());
+        if (item.getDescription() != null)
+            cur.get().setDescription(item.getDescription());
+        cur.get().setOwner(user.get());
+
+        return ItemMapper.toDto(itemRepository.updateItem(id, cur.get()));
     }
 
     @Override
