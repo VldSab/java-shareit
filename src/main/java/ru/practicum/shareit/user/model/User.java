@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
@@ -15,10 +16,17 @@ import javax.validation.constraints.NotNull;
 @SuperBuilder
 @AllArgsConstructor
 @RequiredArgsConstructor
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     @NotNull
+    @Column(name = "name")
     private String name;
     @Email
+    @Column(name = "email")
     private String email;
 }
