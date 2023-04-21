@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.AlreadyExistsException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.repository.DBUserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +22,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceStandard implements UserService {
 
     private final DBUserRepository userRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> list() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toDto)
@@ -35,6 +36,7 @@ public class UserServiceStandard implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserById(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
@@ -46,8 +48,6 @@ public class UserServiceStandard implements UserService {
     public UserDto addUser(User user) {
         if (user.getEmail() == null || user.getName() == null)
             throw new ValidationException("Объект User содержит не все обязательные поля");
-        if (userRepository.existsByEmail(user.getEmail()))
-            throw new AlreadyExistsException("Пользователь с таким email уже существует");
         return UserMapper.toDto(userRepository.save(user));
     }
 

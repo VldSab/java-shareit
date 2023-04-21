@@ -12,10 +12,10 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 public class ItemDto {
-    Long id;
-    String name;
-    String description;
+    private Long id;
+    private String name;
+    private String description;
     @JsonProperty("available")
-    boolean isAvailable;
+    private boolean isAvailable;
 
 }
