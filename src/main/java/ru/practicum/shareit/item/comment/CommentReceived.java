@@ -6,6 +6,11 @@ import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * Comment data transfer object for receiving.
+ * @see Comment
+ * @see CommentDto
+ */
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor

@@ -4,6 +4,11 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.user.dto.UserMapper;
 
+/**
+ * Mapper Booking to BookingDto.
+ * @see Booking
+ * @see BookingDto
+ */
 public class BookingMapper {
 
     public static BookingDto toDto(Booking booking) {

@@ -77,16 +77,14 @@ public class ItemServiceStandard implements ItemService {
             return null;
         LocalDateTime now = LocalDateTime.now();
         Booking prev = null;
-        Booking cur = bookingsList.iterator().next();
+        Booking cur = null;
         for (Booking booking : bookingsList) {
+            cur = booking;
             if (prev != null && (cur.getStart().isAfter(now)))
                 return prev;
             prev = cur;
-            cur = booking;
         }
-        if (cur.getStart().isBefore(now))
-            return cur;
-        return null;
+        return cur;
     }
 
     private Booking nextBookingInSorted(List<Booking> bookingsList) {
