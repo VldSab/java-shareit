@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.AlreadyExistsException;
@@ -72,8 +71,7 @@ public class UserServiceStandard implements UserService {
 
     @Override
     public void deleteUser(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty())
+        if (!userRepository.existsById(userId))
             throw new NotFoundException("Пользователя с id " + userId + " не существует");
         userRepository.deleteById(userId);
     }

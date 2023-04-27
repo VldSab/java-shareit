@@ -5,6 +5,10 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
+/**
+ * Comment data transfer object.
+ * @see Comment
+ */
 @Data
 @SuperBuilder
 public class CommentDto {

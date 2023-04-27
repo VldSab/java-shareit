@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;

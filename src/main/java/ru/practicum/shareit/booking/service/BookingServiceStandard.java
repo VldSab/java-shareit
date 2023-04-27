@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of BookingService interface.
+ * @see BookingService
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

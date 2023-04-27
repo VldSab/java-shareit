@@ -77,14 +77,14 @@ public class ItemServiceStandard implements ItemService {
             return null;
         LocalDateTime now = LocalDateTime.now();
         Booking prev = null;
-        Booking cur = bookingsList.iterator().next();
+        Booking cur = null;
         for (Booking booking : bookingsList) {
-            if (prev != null && cur.getStart().isAfter(now))
+            cur = booking;
+            if (prev != null && (cur.getStart().isAfter(now)))
                 return prev;
             prev = cur;
-            cur = booking;
         }
-        return null;
+        return cur;
     }
 
     private Booking nextBookingInSorted(List<Booking> bookingsList) {
@@ -114,29 +114,37 @@ public class ItemServiceStandard implements ItemService {
         return ItemMapper.toInfoDto(item, comments, previousBookingInSorted(bookings), nextBookingInSorted(bookings));
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public List<ItemInfoDto> getUserItems(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователя с id " + userId + " не существует"));
-        Map<Long, List<Booking>> itemIdToBookings = bookingRepository
-                .findAllByItem_Owner_IdAndStatusNotOrderByStartAsc(userId, BookingStatus.REJECTED)
-                .stream()
-                .collect(Collectors.groupingBy(it -> it.getItem().getId()));
+        if (!userRepository.existsById(userId))
+            throw new NotFoundException("Пользователя с id " + userId + " не существует");
+        // получить все Items
+        List<Item> items = itemRepository.findAllByOwner_IdOrderById(userId);
+        // получить сет идентификаторов Items
+        Set<Long> itemsIds = items.stream().map(Item::getId).collect(Collectors.toSet());
+        // получить комментарии по каждому Item
         Map<Long, List<Comment>> comments = commentRepository
-                .findAllByItem_IdInOrderByItem_Id(itemIdToBookings.keySet())
+                .findAllByItem_IdInOrderByItem_Id(itemsIds)
                 .stream()
                 .collect(Collectors.groupingBy(it -> it.getItem().getId()));
-
-        return itemRepository.findAllByOwner_IdOrderById(userId).stream()
-                .map(it -> ItemMapper.toInfoDto(
-                        it,
-                        comments.getOrDefault(it.getId(), List.of()).stream().map(CommentMapper::toDto).collect(Collectors.toList()),
-                        previousBookingInSorted(itemIdToBookings.getOrDefault(it.getId(), List.of())),
-                        nextBookingInSorted(itemIdToBookings.getOrDefault(it.getId(), List.of())))
-                )
-                .collect(Collectors.toList());
+        // получить букинг по каждому Item
+        Map<Long, List<Booking>> itemIdToBookings = bookingRepository
+                .findAllByItem_IdInOrderByStartAsc(itemsIds)
+                .stream()
+                .collect(Collectors.groupingBy(it -> it.getItem().getId()));
+        // сформировать итоговый спиок ItemInfoDto
+        List<ItemInfoDto> result = new ArrayList<>();
+        for (Item item : items) {
+            ItemInfoDto itemInfoDto = ItemMapper.toInfoDto(
+                    item,
+                    comments.getOrDefault(item.getId(), List.of()).stream().map(CommentMapper::toDto).collect(Collectors.toList()),
+                    previousBookingInSorted(itemIdToBookings.getOrDefault(item.getId(), List.of())),
+                    nextBookingInSorted(itemIdToBookings.getOrDefault(item.getId(), List.of()))
+            );
+            result.add(itemInfoDto);
+        }
+        return result;
     }
 
     @Override

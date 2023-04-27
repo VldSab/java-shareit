@@ -1,12 +1,15 @@
 package ru.practicum.shareit.booking.service;
 
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.ExternalBookingDto;
 
 import java.util.List;
 
+/**
+ * Interface for booking business logic.
+ * @see ru.practicum.shareit.booking.Booking
+ * @see ru.practicum.shareit.booking.controller.BookingController
+ */
 public interface BookingService {
     BookingDto save(Long userId, ExternalBookingDto booking);
 

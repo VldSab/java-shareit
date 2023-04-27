@@ -7,7 +7,10 @@ import java.util.Set;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByItem_IdOrderByCreatedDesc(Long itemId);
+
     List<Comment> findAllByItem_IdIn(Set<Long> idSet);
+
     List<Comment> findAllByItem_IdOrderByCreated(Long itemId);
+
     List<Comment> findAllByItem_IdInOrderByItem_Id(Set<Long> idSet);
 }
