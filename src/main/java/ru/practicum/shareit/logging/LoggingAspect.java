@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class LoggingAspect {
     @Pointcut("within(ru.practicum.shareit.user.controller.UserController) " +
-            "|| within(ru.practicum.shareit.item.ItemController)")
+            "|| within(ru.practicum.shareit.item.ItemController)" +
+            "|| within(ru.practicum.shareit.booking.controller.BookingController)" +
+            "|| within(ru.practicum.shareit.exceptions.MainExceptionHandler)")
     public void logControllers() {
     }
 

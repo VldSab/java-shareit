@@ -1,6 +1,10 @@
 package ru.practicum.shareit.item.dto;
 
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.model.Item;
+
+import java.util.List;
 
 /**
  * Mapping Item to ItemDto
@@ -15,6 +19,18 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .isAvailable(item.getIsAvailable())
+                .build();
+    }
+
+    public static ItemInfoDto toInfoDto(Item item, List<CommentDto> comments, Booking last, Booking next) {
+        return ItemInfoDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .isAvailable(item.getIsAvailable())
+                .lastBooking(last != null ? new ItemInfoDto.BookingDto(last.getId(), last.getBooker().getId()) : null)
+                .nextBooking(next != null ? new ItemInfoDto.BookingDto(next.getId(), next.getBooker().getId()) : null)
+                .comments(comments)
                 .build();
     }
 }

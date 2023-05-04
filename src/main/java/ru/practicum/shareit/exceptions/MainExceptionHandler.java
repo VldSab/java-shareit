@@ -1,10 +1,12 @@
 package ru.practicum.shareit.exceptions;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
 /**
@@ -17,6 +19,15 @@ public class MainExceptionHandler {
     public Map<String, String> handleHappinessOverflow(final NullPointerException e) {
         return Map.of(
                 "error", "Не передан параметр",
+                "message", e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleHappinessOverflow(final ObjectUnavailableException e) {
+        return Map.of(
+                "error", "Объект недоступен",
                 "message", e.getMessage()
         );
     }
@@ -45,6 +56,33 @@ public class MainExceptionHandler {
         return Map.of(
                 "error", "Передан невалидный объект",
                 "message", e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleHappinessOverflow(final DataIntegrityViolationException e) {
+        return Map.of(
+                "error", "Передан невалидный объект",
+                "message", e.getMessage() == null ? "" : e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleHappinessOverflow(final UnsupportedBookingStatusException e) {
+        return Map.of(
+                "message", " Передан некорректный статус бронирования",
+                "error", e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleHappinessOverflow(final ConstraintViolationException e) {
+        return Map.of(
+                "message", " Передан некорректный объект",
+                "error", e.getMessage()
         );
     }
 }

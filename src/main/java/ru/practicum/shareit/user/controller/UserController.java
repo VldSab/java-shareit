@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -43,6 +43,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public boolean deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
+        userService.deleteUser(id);
+        return true;
     }
 }
