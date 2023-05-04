@@ -14,9 +14,9 @@ import ru.practicum.shareit.exceptions.ObjectUnavailableException;
 import ru.practicum.shareit.exceptions.UnsupportedBookingStatusException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.DBItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.DBUserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 public class BookingServiceStandard implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final DBUserRepository userRepository;
-    private final DBItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     public BookingDto save(Long userId, ExternalBookingDto booking) {

@@ -17,5 +17,6 @@ public class ItemDto {
     private String description;
     @JsonProperty("available")
     private boolean isAvailable;
+    private Long requestId;
 
 }
