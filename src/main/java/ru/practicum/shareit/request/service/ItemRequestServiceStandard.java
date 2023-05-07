@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ItemRequestServiceStandard implements ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository;
@@ -30,6 +32,7 @@ public class ItemRequestServiceStandard implements ItemRequestService {
     private final ItemRepository itemRepository;
 
     @Override
+    @Transactional
     public ItemRequestDto addItemRequest(Long requesterId, ItemRequest itemRequest) {
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new NotFoundException("Не существует пользователя с id " + requesterId));

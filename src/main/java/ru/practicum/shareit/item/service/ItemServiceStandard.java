@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -39,35 +42,28 @@ public class ItemServiceStandard implements ItemService {
 
     @Override
     public ItemDto addItem(Item item, Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty())
-            throw new NotFoundException("Пользователя с id " + userId + " не существует");
-        item.setOwner(user.get());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователя с id " + userId + " не существует"));
+        item.setOwner(user);
         return ItemMapper.toDto(itemRepository.save(item));
     }
 
     @Override
     public ItemDto updateItem(Long id, Item item, Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty())
-            throw new NotFoundException("Пользователя с id " + userId + " не существует");
-        Optional<Item> cur = itemRepository.findById(id);
-        if (cur.isEmpty())
-            throw new NotFoundException("Предмета с id " + id + " не существует");
-        if (!Objects.equals(cur.get().getOwner().getId(), userId))
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователя с id " + userId + " не существует"));
+        Item curentItem = itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Предмета с id " + id + " не существует"));
+        if (!Objects.equals(curentItem.getOwner().getId(), userId))
             throw new NotFoundException("У предмета с id " + id + " другой владелец");
 
-        Item curentItem = cur.get();
-
-        if (item.getOwner() != null)
-            curentItem.setOwner(item.getOwner());
         if (item.getIsAvailable() != null)
             curentItem.setIsAvailable(item.getIsAvailable());
         if (item.getName() != null)
             curentItem.setName(item.getName());
         if (item.getDescription() != null)
             curentItem.setDescription(item.getDescription());
-        curentItem.setOwner(user.get());
+        curentItem.setOwner(user);
 
         return ItemMapper.toDto(itemRepository.save(curentItem));
     }
@@ -101,6 +97,9 @@ public class ItemServiceStandard implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemInfoDto getItemById(Long id, Long userId) {
+        if (!userRepository.existsById(userId))
+            throw new NotFoundException("Пользователя с id " + userId + " не существует");
+
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Предмета с id " + id + " не существует"));
 
@@ -116,11 +115,22 @@ public class ItemServiceStandard implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemInfoDto> getUserItems(Long userId) {
+    public List<ItemInfoDto> getUserItems(Long userId, Integer from, Integer size) {
         if (!userRepository.existsById(userId))
             throw new NotFoundException("Пользователя с id " + userId + " не существует");
-        // получить все Items
-        List<Item> items = itemRepository.findAllByOwner_IdOrderById(userId);
+        // получить все Items с пагинацией или без
+        List<Item> items;
+        if (from != null && size != null) {
+            if (from < 0 || size <= 0)
+                throw new ValidationException("Размер страницы и интекс начала не могут быть меньше нуля");
+            int pageNumber = from / size;
+            Pageable pagination = PageRequest.of(pageNumber, size);
+            Page<Item> pageItemRequests = itemRepository
+                    .findAllByOwner_IdOrderById(userId, pagination);
+            items = pageItemRequests.getContent();
+        } else {
+            items = itemRepository.findAllByOwner_IdOrderById(userId);
+        }
         // получить сет идентификаторов Items
         Set<Long> itemsIds = items.stream().map(Item::getId).collect(Collectors.toSet());
         // получить комментарии по каждому Item
@@ -149,13 +159,27 @@ public class ItemServiceStandard implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItemByContent(String content, Long userId) {
+    public List<ItemDto> getItemByContent(String content, Long userId, Integer from, Integer size) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователя с id " + userId + " не существует"));
         // нет обращения к User, stream безопасен
-        return itemRepository.findByContent(content).stream()
-                .map(ItemMapper::toDto)
-                .collect(Collectors.toList());
+        List<ItemDto> items;
+        if (from != null && size != null) {
+            if (from < 0 || size <= 0)
+                throw new ValidationException("Размер страницы и интекс начала не могут быть меньше нуля");
+            int pageNumber = from / size;
+            Pageable pagination = PageRequest.of(pageNumber, size);
+            Page<Item> pageItemRequests = itemRepository.findByContent(content, pagination);
+
+            items = pageItemRequests.getContent().stream()
+                    .map(ItemMapper::toDto)
+                    .collect(Collectors.toList());
+        } else {
+            items = itemRepository.findByContent(content).stream()
+                    .map(ItemMapper::toDto)
+                    .collect(Collectors.toList());
+        }
+        return items;
     }
 
     @Override

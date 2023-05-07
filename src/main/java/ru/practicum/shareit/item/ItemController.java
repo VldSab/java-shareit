@@ -52,16 +52,23 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemInfoDto> getUserItems(@RequestHeader(Headers.USER_ID) Long userId) {
-        return itemService.getUserItems(userId);
+    public List<ItemInfoDto> getUserItems(
+            @RequestHeader(Headers.USER_ID) Long userId,
+            Integer from,
+            Integer size
+    ) {
+        return itemService.getUserItems(userId, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getItemsByContent(@RequestHeader(Headers.USER_ID) Long userId,
-                                           @RequestParam(value = "text", required = false) String content) {
+                                           @RequestParam(value = "text", required = false) String content,
+                                           Integer from,
+                                           Integer size
+    ) {
         if (content == null || content.isBlank())
             return new ArrayList<>();
-        return itemService.getItemByContent(content, userId);
+        return itemService.getItemByContent(content, userId, from, size);
 
     }
 

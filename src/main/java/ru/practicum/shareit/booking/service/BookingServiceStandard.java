@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of BookingService interface.
+ *
  * @see BookingService
  */
 @Service
@@ -97,11 +101,27 @@ public class BookingServiceStandard implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getBookingsByBookerId(Long bookerId, String state) {
+    public List<BookingDto> getBookingsByBookerId(Long bookerId, String state, Integer from, Integer size) {
         userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("Нет пользователя с таким id " + bookerId));
         if (!BookingStatus.getSet().contains(state))
             throw new UnsupportedBookingStatusException("Unknown state: " + state);
+        BookingStatus status = BookingStatus.valueOf(state);
+        List<Booking> bookings;
+        if (from != null && size != null) {
+            if (from < 0 || size <= 0)
+                throw new ValidationException("Размер страницы и интекс начала не могут быть меньше нуля");
+            int pageNumber = from / size;
+            Pageable pagination = PageRequest.of(pageNumber, size);
+            bookings = findByBookerIdWithPagination(bookerId, state, pagination);
+        } else {
+            bookings = findByBookerIdNoPagination(bookerId, state);
+        }
+
+        return bookings.stream().map(BookingMapper::toDto).collect(Collectors.toList());
+    }
+
+    private List<Booking> findByBookerIdNoPagination(Long bookerId, String state) {
         BookingStatus status = BookingStatus.valueOf(state);
         List<Booking> bookings;
         switch (status) {
@@ -128,17 +148,67 @@ public class BookingServiceStandard implements BookingService {
             default:
                 bookings = bookingRepository.findBookingsByBooker_IdAndStatusOrderByStartDesc(bookerId, status);
         }
+        return bookings;
+    }
 
-        return bookings.stream().map(BookingMapper::toDto).collect(Collectors.toList());
+    private List<Booking> findByBookerIdWithPagination(Long bookerId, String state, Pageable pageable) {
+        BookingStatus status = BookingStatus.valueOf(state);
+        Page<Booking> bookings;
+        switch (status) {
+            case ALL:
+                bookings = bookingRepository.findBookingsByBooker_IdOrderByStartDesc(bookerId, pageable);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findAllByBooker_IdAndStartIsAfterOrderByStartDesc(bookerId,
+                        LocalDateTime.now(),
+                        pageable);
+                break;
+            case PAST:
+                bookings = bookingRepository.findAllByBooker_IdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
+                        bookerId,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        pageable
+                );
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findAllByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                        bookerId,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        pageable
+                );
+                break;
+            default:
+                bookings = bookingRepository.findBookingsByBooker_IdAndStatusOrderByStartDesc(bookerId,
+                        status,
+                        pageable);
+        }
+        return bookings.getContent();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getBookingsByOwner(Long ownerId, String state) {
+    public List<BookingDto> getBookingsByOwner(Long ownerId, String state, Integer from, Integer size) {
         if (!BookingStatus.getSet().contains(state))
             throw new UnsupportedBookingStatusException("Unknown state: " + state);
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Нет пользователя с таким id " + ownerId));
+        BookingStatus status = BookingStatus.valueOf(state);
+        List<Booking> bookings;
+        if (from != null && size != null) {
+            if (from < 0 || size <= 0)
+                throw new ValidationException("Размер страницы и интекс начала не могут быть меньше нуля");
+            int pageNumber = from / size;
+            Pageable pagination = PageRequest.of(pageNumber, size);
+            bookings = findByOwnerWithPagination(ownerId, state, pagination);
+        } else {
+            bookings = findByOwnerNoPagination(ownerId, state);
+        }
+        return bookings.stream().map(BookingMapper::toDto).collect(Collectors.toList());
+    }
+
+    private List<Booking> findByOwnerNoPagination(Long ownerId, String state) {
         BookingStatus status = BookingStatus.valueOf(state);
         List<Booking> bookings;
         switch (status) {
@@ -165,7 +235,40 @@ public class BookingServiceStandard implements BookingService {
             default:
                 bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(ownerId, status);
         }
+        return bookings;
+    }
 
-        return bookings.stream().map(BookingMapper::toDto).collect(Collectors.toList());
+    private List<Booking> findByOwnerWithPagination(Long ownerId, String state, Pageable pageable) {
+        BookingStatus status = BookingStatus.valueOf(state);
+        Page<Booking> bookings;
+        switch (status) {
+            case ALL:
+                bookings = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(ownerId, pageable);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStartIsAfterOrderByStartDesc(ownerId,
+                        LocalDateTime.now(),
+                        pageable);
+                break;
+            case PAST:
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
+                        ownerId,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        pageable
+                );
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                        ownerId,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        pageable
+                );
+                break;
+            default:
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(ownerId, status, pageable);
+        }
+        return bookings.getContent();
     }
 }
