@@ -1,19 +1,20 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.item.comment.Comment;
-import ru.practicum.shareit.item.comment.CommentDto;
-import ru.practicum.shareit.item.comment.CommentMapper;
-import ru.practicum.shareit.item.comment.CommentRepository;
+import ru.practicum.shareit.exceptions.ValidationException;
+import ru.practicum.shareit.item.comment.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +70,6 @@ class ItemServiceStandardTest {
     private static final Comment comment = Comment.builder()
             .id(1L)
             .item(item)
-            .created(LocalDateTime.now())
             .author(otherUser)
             .text("Good one")
             .build();
@@ -176,10 +178,160 @@ class ItemServiceStandardTest {
     }
 
     @Test
-    void getItemByContent() {
+    void getUserItems_whenWithoutPagination_thenReturnItemInfoDto() {
+        when(userRepository.existsById(myUser.getId())).thenReturn(true);
+        when(itemRepository.findAllByOwner_IdOrderById(myUser.getId()))
+                .thenReturn(List.of(item));
+
+        List<ItemInfoDto> result = itemService.getUserItems(myUser.getId(), null, null);
+
+        verify(commentRepository).findAllByItem_IdInOrderByItem_Id(Mockito.anySet());
+        verify(bookingRepository).findAllByItem_IdInOrderByStartAsc(Mockito.anySet());
+
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0));
+        assertInstanceOf(ItemInfoDto.class, result.get(0));
     }
 
     @Test
-    void addComment() {
+    void getUserItems_whenWithPagination_thenReturnItemInfoDto() {
+        int from = 0;
+        int size = 10;
+        int pageNumber = from / size;
+        when(userRepository.existsById(myUser.getId())).thenReturn(true);
+        when(itemRepository.findAllByOwner_IdOrderById(myUser.getId(), PageRequest.of(pageNumber, size)))
+                .thenReturn(new PageImpl<>(List.of(item)));
+
+        List<ItemInfoDto> result = itemService.getUserItems(myUser.getId(), from, size);
+
+        verify(commentRepository).findAllByItem_IdInOrderByItem_Id(Mockito.anySet());
+        verify(bookingRepository).findAllByItem_IdInOrderByStartAsc(Mockito.anySet());
+
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0));
+        assertInstanceOf(ItemInfoDto.class, result.get(0));
     }
+
+    @Test
+    void getUserItems_whenUserNotExists_thenThrowNoFoundException() {
+        when(userRepository.existsById(myUser.getId())).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> itemService.getUserItems(myUser.getId(), null, null));
+    }
+
+    @Test
+    void getUserItems_whenPaginationIsNotValid_thenThrowNoFoundException() {
+        when(userRepository.existsById(myUser.getId())).thenReturn(true);
+
+        assertThrows(ValidationException.class, () -> itemService.getUserItems(myUser.getId(), -1, 1));
+        assertThrows(ValidationException.class, () -> itemService.getUserItems(myUser.getId(), 1, -1));
+        assertThrows(ValidationException.class, () -> itemService.getUserItems(myUser.getId(), 1, 0));
+    }
+
+    @Test
+    void getItemByContent_whenWithoutPagination_thenReturnItemDto() {
+        String content = item.getName();
+        when(userRepository.existsById(myUser.getId())).thenReturn(true);
+        when(itemRepository.findByContent(content)).thenReturn(List.of(item));
+
+        List<ItemDto> items = itemService.getItemByContent(content, myUser.getId(), null, null);
+
+        assertEquals(List.of(ItemMapper.toDto(item)), items);
+        verify(itemRepository).findByContent(Mockito.anyString());
+    }
+
+    @Test
+    void getItemByContent_whenWithPagination_thenReturnItemDto() {
+        int from = 0;
+        int size = 10;
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
+        String content = item.getName();
+        when(userRepository.existsById(myUser.getId())).thenReturn(true);
+        when(itemRepository.findByContent(content, pageable)).thenReturn(new PageImpl<>(List.of(item)));
+
+        List<ItemDto> items = itemService.getItemByContent(content, myUser.getId(), from, size);
+
+        assertEquals(List.of(ItemMapper.toDto(item)), items);
+        verify(itemRepository).findByContent(content, pageable);
+    }
+
+    @Test
+    void getItemByContent_whenUserNotExists_thenThrowNotFoundException() {
+        String content = item.getName();
+        when(userRepository.existsById(myUser.getId())).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> itemService.getItemByContent(content, myUser.getId(), null, null));
+    }
+
+    @Test
+    void getItemByContent_whenPaginationIsNotValid_thenThrowValidationException() {
+        String content = item.getName();
+        when(userRepository.existsById(myUser.getId())).thenReturn(true);
+
+        assertThrows(ValidationException.class, () -> itemService.getItemByContent(content, myUser.getId(), -1, 1));
+        assertThrows(ValidationException.class, () -> itemService.getItemByContent(content, myUser.getId(), 1, -1));
+        assertThrows(ValidationException.class, () -> itemService.getItemByContent(content, myUser.getId(), 1, 0));
+    }
+
+    @Test
+    void addComment_whenAuthorExistsAndItemExistsAndUserUsedItem_thenReturnCommentDto() {
+        when(userRepository.findById(otherUser.getId())).thenReturn(Optional.of(otherUser));
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(bookingRepository
+                .findAllByItem_IdAndBooker_IdAndStatusNotAndStartBefore(
+                        eq(item.getId()),
+                        eq(otherUser.getId()),
+                        eq(BookingStatus.REJECTED),
+                        any(LocalDateTime.class)
+                )
+        ).thenReturn(List.of(booking1));
+
+        Comment savedComment = Comment.builder()
+                .text(comment.getText())
+                .author(otherUser)
+                .item(item)
+                .created(LocalDateTime.now())
+                .build();
+        when(commentRepository.save(any(Comment.class))).thenReturn(savedComment);
+
+        CommentDto result = itemService.addComment(otherUser.getId(), item.getId(), new CommentReceived(comment.getText()));
+
+        assertNotNull(result);
+        assertInstanceOf(CommentDto.class, result);
+        verify(commentRepository).save(any(Comment.class));
+    }
+
+    @Test
+    void addComment_whenAuthorNotExists_thenThrowNotFoundException() {
+        when(userRepository.findById(otherUser.getId())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> itemService.addComment(otherUser.getId(), item.getId(), new CommentReceived("text")));
+    }
+
+    @Test
+    void addComment_whenItemNotExists_thenThrowNotFoundException() {
+        when(userRepository.findById(otherUser.getId())).thenReturn(Optional.of(otherUser));
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> itemService.addComment(otherUser.getId(), item.getId(), new CommentReceived("text")));
+    }
+
+    @Test
+    void addComment_whenBookingListIsEmpty_thenThrowValidationException() {
+        when(userRepository.findById(otherUser.getId())).thenReturn(Optional.of(otherUser));
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(bookingRepository.findAllByItem_IdAndBooker_IdAndStatusNotAndStartBefore(
+                eq(item.getId()),
+                eq(otherUser.getId()),
+                eq(BookingStatus.REJECTED),
+                any(LocalDateTime.class))
+        ).thenReturn(List.of());
+
+        assertThrows(ValidationException.class,
+                () -> itemService.addComment(otherUser.getId(), item.getId(), new CommentReceived("text")));
+    }
+
 }
