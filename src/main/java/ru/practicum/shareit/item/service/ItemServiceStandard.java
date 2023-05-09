@@ -160,8 +160,8 @@ public class ItemServiceStandard implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> getItemByContent(String content, Long userId, Integer from, Integer size) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователя с id " + userId + " не существует"));
+        if (!userRepository.existsById(userId))
+            throw new NotFoundException("Пользователя с id " + userId + " не существует");
         // нет обращения к User, stream безопасен
         List<ItemDto> items;
         if (from != null && size != null) {

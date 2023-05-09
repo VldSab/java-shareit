@@ -75,8 +75,8 @@ public class BookingServiceStandard implements BookingService {
     public BookingDto approve(Long ownerId, Long bookingId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Нет брони с таким id " + bookingId));
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("Нет владельца с id " + ownerId));
+        if (!userRepository.existsById(ownerId))
+            throw new NotFoundException("Нет владельца с id " + ownerId);
         if (!Objects.equals(booking.getItem().getOwner().getId(), ownerId))
             throw new NotFoundException("Пользователь " + ownerId + "не является владельцем предмета. " +
                     "Подтвердить бронирование может только владелец.");
@@ -102,15 +102,14 @@ public class BookingServiceStandard implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDto> getBookingsByBookerId(Long bookerId, String state, Integer from, Integer size) {
-        userRepository.findById(bookerId)
-                .orElseThrow(() -> new NotFoundException("Нет пользователя с таким id " + bookerId));
+        if (!userRepository.existsById(bookerId))
+            throw new NotFoundException("Нет пользователя с таким id " + bookerId);
         if (!BookingStatus.getSet().contains(state))
             throw new UnsupportedBookingStatusException("Unknown state: " + state);
-        BookingStatus status = BookingStatus.valueOf(state);
         List<Booking> bookings;
         if (from != null && size != null) {
             if (from < 0 || size <= 0)
-                throw new ValidationException("Размер страницы и интекс начала не могут быть меньше нуля");
+                throw new ValidationException("Размер страницы и индекс начала не могут быть меньше нуля");
             int pageNumber = from / size;
             Pageable pagination = PageRequest.of(pageNumber, size);
             bookings = findByBookerIdWithPagination(bookerId, state, pagination);
@@ -190,11 +189,10 @@ public class BookingServiceStandard implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDto> getBookingsByOwner(Long ownerId, String state, Integer from, Integer size) {
+        if (!userRepository.existsById(ownerId))
+            throw new NotFoundException("Нет пользователя с таким id " + ownerId);
         if (!BookingStatus.getSet().contains(state))
             throw new UnsupportedBookingStatusException("Unknown state: " + state);
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("Нет пользователя с таким id " + ownerId));
-        BookingStatus status = BookingStatus.valueOf(state);
         List<Booking> bookings;
         if (from != null && size != null) {
             if (from < 0 || size <= 0)
