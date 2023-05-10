@@ -77,7 +77,8 @@ public class ItemRequestServiceStandard implements ItemRequestService {
                     .findAllByRequester_IdNotOrderByCreatedDesc(requesterId, pagination);
             itemRequests = pageItemRequests.getContent();
         } else {
-            itemRequests = itemRequestRepository.findAllByRequester_IdOrderByCreatedDesc(requesterId);
+            itemRequests = itemRequestRepository.findAllByRequester_IdNotOrderByCreatedDesc(requesterId, null)
+                    .getContent();
         }
         // получаем все ответы отсортированные от новых к старым
         List<ItemResponse> itemResponses = itemRepository.findAllByRequestIdNotNull().stream()
