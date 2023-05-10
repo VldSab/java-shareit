@@ -52,13 +52,11 @@ class ItemServiceStandardTest {
             .email("user@gmail.com")
             .name("John")
             .build();
-
     private static final User otherUser = User.builder()
             .id(2L)
             .email("other@gmail.com")
             .name("Frank")
             .build();
-
     private static final Item item = Item.builder()
             .id(1L)
             .name("Item")
@@ -66,14 +64,12 @@ class ItemServiceStandardTest {
             .description("Simple item")
             .isAvailable(true)
             .build();
-
     private static final Comment comment = Comment.builder()
             .id(1L)
             .item(item)
             .author(otherUser)
             .text("Good one")
             .build();
-
     private static final Booking booking1 = Booking.builder()
             .id(1L)
             .start(LocalDateTime.now().minusDays(3))
