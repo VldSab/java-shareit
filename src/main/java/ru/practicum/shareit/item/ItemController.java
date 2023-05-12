@@ -27,7 +27,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto addItem(@RequestHeader(Headers.USER_ID) Long userId, @RequestBody @Valid Item item) {
+    public ItemDto addItem(
+            @RequestHeader(Headers.USER_ID) Long userId,
+            @RequestBody @Valid Item item
+    ) {
         return itemService.addItem(item, userId);
     }
 
@@ -35,19 +38,25 @@ public class ItemController {
     public CommentDto addComment(
             @RequestHeader(Headers.USER_ID) Long authorId,
             @PathVariable Long itemId,
-            @RequestBody CommentReceived comment) {
+            @RequestBody CommentReceived comment
+    ) {
         return itemService.addComment(authorId, itemId, comment);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto updateItem(@PathVariable Long id,
-                              @RequestHeader(Headers.USER_ID) Long userId,
-                              @RequestBody Item item) {
+    public ItemDto updateItem(
+            @PathVariable Long id,
+            @RequestHeader(Headers.USER_ID) Long userId,
+            @RequestBody Item item
+    ) {
         return itemService.updateItem(id, item, userId);
     }
 
     @GetMapping("/{id}")
-    public ItemInfoDto getItemById(@RequestHeader(Headers.USER_ID) Long userId, @PathVariable Long id) {
+    public ItemInfoDto getItemById(
+            @RequestHeader(Headers.USER_ID) Long userId,
+            @PathVariable Long id
+    ) {
         return itemService.getItemById(id, userId);
     }
 
@@ -61,10 +70,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsByContent(@RequestHeader(Headers.USER_ID) Long userId,
-                                           @RequestParam(value = "text", required = false) String content,
-                                           Integer from,
-                                           Integer size
+    public List<ItemDto> getItemsByContent(
+            @RequestParam(value = "text", required = false) String content,
+            @RequestHeader(Headers.USER_ID) Long userId,
+            Integer from,
+            Integer size
     ) {
         if (content == null || content.isBlank())
             return new ArrayList<>();
