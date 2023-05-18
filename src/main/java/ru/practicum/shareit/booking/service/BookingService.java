@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * Interface for booking business logic.
+ *
  * @see ru.practicum.shareit.booking.Booking
  * @see ru.practicum.shareit.booking.controller.BookingController
  */
@@ -17,7 +18,7 @@ public interface BookingService {
 
     BookingDto getBookingById(Long userId, Long bookingId);
 
-    List<BookingDto> getBookingsByBookerId(Long bookerId, String state);
+    List<BookingDto> getBookingsByBookerId(Long bookerId, String state, Integer from, Integer size);
 
-    List<BookingDto> getBookingsByOwner(Long ownerId, String state);
+    List<BookingDto> getBookingsByOwner(Long ownerId, String state, Integer from, Integer size);
 }

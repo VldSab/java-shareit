@@ -38,4 +38,8 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+    // если вещь добавляется владельцем в ответ на запрос
+    // то это поле будет заполненно id-запроса
+    @Column(name = "requestId")
+    private Long requestId;
 }

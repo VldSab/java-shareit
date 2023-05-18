@@ -20,7 +20,8 @@ public class BookingController {
     @PostMapping
     public BookingDto save(
             @RequestHeader(Headers.USER_ID) Long userId,
-            @RequestBody @Valid ExternalBookingDto booking) {
+            @RequestBody @Valid ExternalBookingDto booking
+    ) {
         return bookingService.save(userId, booking);
     }
 
@@ -28,28 +29,36 @@ public class BookingController {
     public BookingDto approve(
             @RequestHeader(Headers.USER_ID) Long ownerId,
             @PathVariable Long bookingId,
-            @RequestParam boolean approved) {
+            @RequestParam boolean approved
+    ) {
         return bookingService.approve(ownerId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getBookingById(
             @RequestHeader(Headers.USER_ID) Long userId,
-            @PathVariable Long bookingId) {
+            @PathVariable Long bookingId
+    ) {
         return bookingService.getBookingById(userId, bookingId);
     }
 
     @GetMapping
     public List<BookingDto> getBookingsByBooker(
             @RequestHeader(Headers.USER_ID) Long bookerId,
-            @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByBookerId(bookerId, state);
+            @RequestParam(defaultValue = "ALL") String state,
+            Integer from,
+            Integer size
+    ) {
+        return bookingService.getBookingsByBookerId(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingsByOwner(
             @RequestHeader(Headers.USER_ID) Long ownerId,
-            @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByOwner(ownerId, state);
+            @RequestParam(required = false, defaultValue = "ALL") String state,
+            Integer from,
+            Integer size
+    ) {
+        return bookingService.getBookingsByOwner(ownerId, state, from, size);
     }
 }
